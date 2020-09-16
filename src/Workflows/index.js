@@ -17,6 +17,7 @@ const WORKFLOW = gql`
       }
       items {
         id
+        points
         genericFeature {
           id
           name
@@ -41,7 +42,7 @@ grid-gap: 20px;
 `
 
 const Workflows = () => {
-  const { data, error, loading } = useQuery(WORKFLOW)
+  const { data, error, loading, refetch } = useQuery(WORKFLOW)
   return (
     <Container>
       {error && (<div>Error! {error}</div>)}
@@ -51,7 +52,7 @@ const Workflows = () => {
        {data && <Types types={data.workflow.types} />}
       </Route>
       <Route path="/workflows/:parentId/:subTypeId">
-       {data && <TypeItems types={data.workflow.types} />}
+       {data && <TypeItems types={data.workflow.types} refetch={refetch}/>}
       </Route>
     </Container>
   )

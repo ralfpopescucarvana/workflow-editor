@@ -6,6 +6,9 @@ import ImperfectionItem from './ImperfectionItem'
 const IMPERFECTION_ITEMS = gql`
 {
   imperfectionItems {
+    id
+    sortOrdinal
+    internalDescription
     type {
       id
       name
@@ -24,14 +27,14 @@ grid-gap: 20px;
 `
 
 const ImperfectionItems = () => {
-  const { data, error, loading } = useQuery(IMPERFECTION_ITEMS)
+  const { data, error, loading, refetch } = useQuery(IMPERFECTION_ITEMS)
 
   return (
     <Container>
       {error && (<div>Error! {error}</div>)}
       {loading && (<div>Loading...</div>)}
       {data && data.imperfectionItems
-      .map(imperfectionItem => <ImperfectionItem imperfectionItem={imperfectionItem}/>)}
+      .map(imperfectionItem => <ImperfectionItem imperfectionItem={imperfectionItem} refetch={refetch} key={`imperfectionItem${imperfectionItem.id}`}/>)}
     </Container>
   )
 }

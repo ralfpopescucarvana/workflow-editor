@@ -1,6 +1,51 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { ReactComponent as TrashIcon } from '../../../assets/delete.svg'
+import { ReactComponent as EditIcon } from '../../../assets/edit.svg'
+import { ReactComponent as Check } from '../../../assets/correct.svg'
+import { ReactComponent as Close } from '../../../assets/close.svg'
+import { gql, useMutation } from '@apollo/client';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+
+const DELETE_WORKFLOW_ITEM = gql`
+mutation DeleteWorkflowItem($id: Int!) {
+    deleteWorkflowItem(id: $id) {
+        id
+    }
+}
+`
+
+const INSERT_EXAMPLE_PHOTO_FILE = gql`
+mutation InsertExamplePhotoFileToGenericFeature($input: InsertExamplePhotoFileToGenericFeatureInput!) {
+    insertExamplePhotoFileToGenericFeature(input: $input) {
+    		id
+        examplePhotoFile {
+          id
+          url
+        }
+    }
+  }
+`
+
+const UPDATE_GENERIC_FEATURE = gql`
+mutation UpdateGenericFeature($input: UpdateGenericFeatureInput!) {
+  updateGenericFeature(input: $input) {
+    id
+    name
+    description
+  }
+}
+`
+
+const UPDATE_WORKFLOW_ITEM = gql`
+mutation UpdateWorkflowItem($input: UpdateWorkflowItemInput!) {
+  updateWorkflowItem(input: $input) {
+    id
+    points
+  }
+}
+`
+
 
 const Container = styled.div`
 display: flex;
@@ -14,6 +59,8 @@ const Name = styled.div`
 font-size: 24px;
 flex-grow: 1;
 `
+
+
 
 const Description = styled.div``
 
@@ -34,23 +81,164 @@ height: 20px;
 width: 20px;
 `
 
+const StyledEditIcon = styled(EditIcon)`
+height: 20px;
+width: 20px;
+`
+
 const TitleRow = styled.div`
 display: flex;
 flex-direction: row;
 `
 
-const TypeItem = ({ item }) => (
+const NameRow = styled.div`
+margin-bottom: 6px;
+display: flex;
+flex-direction: row;
+`
+
+const StyledForm = styled(Form)`
+display: flex;
+flex-direction: column;
+`
+
+const StyledField = styled(Field)`
+margin-bottom: 8px;
+`
+
+const StyledCheckIcon = styled(Check)`
+height: 20px;
+width: 20px;
+cursor: pointer;
+
+&:hover {
+  opacity: 0.7; 
+}
+`
+
+
+const StyledCloseIcon = styled(Close)`
+height: 16px;
+width: 16px;
+cursor: pointer;
+margin-left: 12px;
+
+&:hover {
+  opacity: 0.7; 
+}
+`
+
+
+const Button = styled.button`
+outline: none;
+border: none;
+background-color: none;
+align-items: center;
+padding: none;
+justify-content: center;
+`
+
+const TypeItem = ({ item, refetch }) => {
+  const [deleteWorkflowItem, { loading: deleting }] = useMutation(DELETE_WORKFLOW_ITEM, { onCompleted: () => refetch()});
+  const [updateWorkflowItem, { loading: updatingWorkflow }] = useMutation(UPDATE_WORKFLOW_ITEM);
+  const [updateGenericFeature, { loading: updatingGenericFeature }] = useMutation(UPDATE_GENERIC_FEATURE);
+  const [updateExamplePhoto, { loading: updatingExamplePhoto }] = useMutation(INSERT_EXAMPLE_PHOTO_FILE);
+  const [mode, setMode] = useState('DEFAULT')
+  return (
   <Container>
+    {mode === 'DEFAULT' && 
+    <>
     <TitleRow>
       <Name>{item.genericFeature.name}</Name>
-      <StyledTrashIcon />
+      <StyledEditIcon onClick={() => setMode('EDIT')}/>
+      <StyledTrashIcon onClick={() => setMode('DELETE')}/>
     </TitleRow>
     <Description>{item.genericFeature.description}</Description>
     {console.log(item.genericFeature.examplePhotoFile?.url)}
     <PhotoContainer>
       <ExamplePhoto src={item.genericFeature.examplePhotoFile?.url} />
     </PhotoContainer>
-    </Container>
-)
+    </>
+    }
+    {mode === 'DELETE' && 
+    <>
+    <Name>
+    Are you sure?
+    </Name>
+    <button onClick={() => {
+      deleteWorkflowItem({ variables: { id: item.id } })
+      setMode('DEFAULT')
+    }}>Yes!</button>
+    <button onClick={() => setMode('DEFAULT')}>Not sure</button>
+    </>
+    }
+    {mode === 'EDIT' && (
+    <Formik
+    initialValues={{ 
+      name: item.genericFeature.name, 
+      description: item.genericFeature.description, 
+      points:  item.points,
+      url: item.genericFeature.examplePhotoFile.url
+    }}
+    validate={values => {
+      const errors = {};
+      if (!values.name) {
+        errors.name = 'Required';
+      }
+      if (!values.description) {
+        errors.description = 'Required';
+      }
+      if (!values.points) {
+        errors.points = 'Required';
+      }
+      if (!values.url) {
+        errors.url = 'Required';
+      }
+      return errors;
+    }}
+    onSubmit={async ({ name, description, points, url }, { setSubmitting }) => {
+      await updateWorkflowItem({ variables: { input: { id: item.id, payload: { points }}}})
+      await updateGenericFeature({ variables: { input: { id: item.genericFeature.id, payload: { name, description }}}})
+      await updateExamplePhoto({ variables: { input: { genericFeatureId: item.genericFeature.id, payload: { url }}}})
+      setSubmitting(false)
+      setMode('DEFAULT')
+    }}
+  >
+    {({ isSubmitting }) => (
+      <>
+      {updatingWorkflow || updatingGenericFeature || updatingExamplePhoto ? <div>Updating...</div> : (
+        <StyledForm>
+        <NameRow>
+        <Name>Edit mode</Name>
+        <Button type="submit" disabled={isSubmitting}>
+          <StyledCheckIcon />
+        </Button>
+        <Button onClick={() => setMode('DEFAULT')}>
+          <StyledCloseIcon />
+        </Button>
+      </NameRow>
+        Name
+        <StyledField type="text" name="name" label="name" />
+        <ErrorMessage name="name" component="div" />
+        Description
+        <StyledField component="textarea" name="description" />
+        <ErrorMessage name="description" component="div" />
+        Points
+        <StyledField component="text" name="points" />
+        <ErrorMessage name="points" component="div" />
+        Example Photo Url
+        <StyledField type="text" name="url" />
+        <ErrorMessage name="url" component="div" />
+      </StyledForm>
+      )}
+      </>
+    )}
+    </Formik>
+    )}
+</Container>
+)}
+
+
+
 
 export default TypeItem

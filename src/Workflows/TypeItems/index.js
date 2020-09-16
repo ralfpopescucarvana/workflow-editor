@@ -10,12 +10,12 @@ grid-auto-rows: 320px;
 grid-gap: 20px;
 `
 
-const TypeItems = ({ types }) => {
+const TypeItems = ({ types, refetch }) => {
   const {  subTypeId: stringSubTypeId } = useParams()
   const subTypeId = parseInt(stringSubTypeId)
   return (
   <Container>
-    {types.find(type => type.id === subTypeId).items.map(item => <TypeItem item={item} />)}
+    {types.find(type => type.id === subTypeId).items.map(item => <TypeItem item={item} refetch={refetch} key={`item${item.id}`}/>)}
   </Container>
 )}
 
