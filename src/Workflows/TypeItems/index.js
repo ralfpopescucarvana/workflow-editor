@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import TypeItem from './TypeItem'
+import NewTypeItem from './NewTypeItem'
 
 const Container = styled.div`
 display: grid;
@@ -15,6 +16,7 @@ const TypeItems = ({ types, refetch }) => {
   const subTypeId = parseInt(stringSubTypeId)
   return (
   <Container>
+    <NewTypeItem refetch={refetch} />
     {types.find(type => type.id === subTypeId).items.map(item => <TypeItem item={item} refetch={refetch} key={`item${item.id}`}/>)}
   </Container>
 )}

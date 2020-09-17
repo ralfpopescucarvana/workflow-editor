@@ -134,13 +134,49 @@ margin-bottom: 8px;
 const SortOrdinalContainer = styled.div`
 border-radius: 50%;
 padding: 6px;
-font-size: 8px;
+font-size: 12px;
 align-items: center;
 justify-content: center;
+align-text: center;
+margin-right: 8px;
 color: white;
 width: 8px;
 height: 8px;
+display: flex;
 background-color: purple;
+`
+
+const SureButton = styled.button`
+color: white;
+background-color: green;
+border: none;
+border-radius: 8px;
+padding: 8px;
+width: 80px;
+cursor: pointer;
+margin-right: 16px;
+`
+
+const NotSureButton = styled.button`
+color: white;
+background-color: red;
+border: none;
+border-radius: 8px;
+padding: 8px;
+width: 80px;
+cursor: pointer;
+`
+
+const ButtonRow = styled.div`
+display: flex;
+flex-direction: row;
+flex-grow: 1;
+align-items: center;
+justify-content: center;
+`
+
+const StyledErrorMessage = styled(ErrorMessage)`
+color: red;
 `
 
 
@@ -159,10 +195,12 @@ return (
       name: imperfectionItem.type.name, 
       description: imperfectionItem.type.description,
       sortOrdinal:  imperfectionItem.sortOrdinal,
-      internalDescription: imperfectionItem.internalDescription
+      internalDescription: imperfectionItem.internalDescription,
+      locationId: imperfectionItem.type.location.id,
     }}
     validate={values => {
       const errors = {};
+      console.log('values', values)
       if (!values.name) {
         errors.name = 'Required';
       }
@@ -172,13 +210,18 @@ return (
       if (!values.internalDescription) {
         errors.internalDescription = 'Required';
       }
-      if (!values.sortOrdinal) {
+      if (values.sortOrdinal == null) {
         errors.sortOrdinal = 'Required';
       }
+      if (values.locationId == null) {
+        errors.locationId = 'Required';
+      }
+      console.log('errors', errors)
       return errors;
     }}
-    onSubmit={({ name, description, internalDescription, sortOrdinal }, { setSubmitting }) => {
-      updateImperfectionItem({ variables: { input: { id: imperfectionItem.id, payload: { name, description, sortOrdinal, internalDescription }}}})
+    onSubmit={async ({ name, description, internalDescription, locationId, sortOrdinal }, { setSubmitting }) => {
+      console.log('submit', name, description, internalDescription, locationId, sortOrdinal)
+      await updateImperfectionItem({ variables: { input: { id: imperfectionItem.id, payload: { name, description, sortOrdinal, internalDescription, locationId }}}})
       setSubmitting(false)
     }}
   >
@@ -195,16 +238,22 @@ return (
       </NameRow>
         Name
         <StyledField type="text" name="name" label="name" />
-        <ErrorMessage name="name" component="div" />
+        <StyledErrorMessage name="name" component="div" />
         Description
         <StyledField component="textarea" name="description" />
-        <ErrorMessage name="description" component="div" />
+        <StyledErrorMessage name="description" component="div" />
         Internal Description
         <StyledField component="textarea" name="internalDescription" />
-        <ErrorMessage name="internalDescription" component="div" />
+        <StyledErrorMessage name="internalDescription" component="div" />
         Order
         <StyledField type="text" name="sortOrdinal" />
-        <ErrorMessage name="sortOrdinal" component="div" />
+        <StyledErrorMessage name="sortOrdinal" component="div" />
+        <Field as="select" name="locationId">
+             <option value={0}>Exterior</option>
+             <option value={1}>Interior</option>
+             <option value={2}>Glass</option>
+           </Field>
+           <StyledErrorMessage name="locationId" component="div" />
       </StyledForm>
     )}
   </Formik>
@@ -224,19 +273,22 @@ return (
         InternalDescription:
       </div>
       <Description>{imperfectionItem.internalDescription}</Description>
+      <Name>Location: {imperfectionItem.type.location.name}</Name>
       </>
     )}
     {mode === 'DELETE' && (
       <>
       {deleting  ? <div>Deleting...</div> : (
       <>
-      <NameRow>
+      <Name>
       Are you sure?
-      </NameRow>
-      <button onClick={() => {
+      </Name>
+      <ButtonRow>
+      <SureButton onClick={() => {
         deleteImperfectionItem({ variables: { id: imperfectionItem.id } })
-      }}>Yes!</button>
-      <button onClick={() => setMode('DEFAULT')}>Not sure</button>
+      }}>Yes!</SureButton>
+      <NotSureButton onClick={() => setMode('DEFAULT')}>Not sure</NotSureButton>
+      </ButtonRow>
       </>
       )}
       </>

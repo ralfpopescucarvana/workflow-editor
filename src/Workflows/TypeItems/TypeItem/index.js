@@ -79,11 +79,22 @@ justify-content: center;
 const StyledTrashIcon = styled(TrashIcon)`
 height: 20px;
 width: 20px;
+cursor: pointer;
+margin-left: 12px;
+
+&:hover {
+  opacity: 0.7; 
+}
 `
 
 const StyledEditIcon = styled(EditIcon)`
 height: 20px;
 width: 20px;
+cursor: pointer;
+
+&:hover {
+  opacity: 0.7; 
+}
 `
 
 const TitleRow = styled.div`
@@ -136,6 +147,51 @@ background-color: none;
 align-items: center;
 padding: none;
 justify-content: center;
+cursor: pointer;
+`
+
+const SureButton = styled.button`
+color: white;
+background-color: green;
+border: none;
+border-radius: 8px;
+padding: 8px;
+width: 80px;
+margin-right: 16px;
+cursor: pointer;
+`
+
+const NotSureButton = styled.button`
+color: white;
+background-color: red;
+border: none;
+border-radius: 8px;
+padding: 8px;
+width: 80px;
+cursor: pointer;
+`
+
+const ButtonRow = styled.div`
+display: flex;
+flex-direction: row;
+flex-grow: 1;
+align-items: center;
+justify-content: center;
+`
+
+const PointsContainer = styled.div`
+display: flex;
+border-radius: 50%;
+padding: 6px;
+font-size: 12px;
+align-items: center;
+justify-content: center;
+align-text: center;
+margin-right: 8px;
+color: white;
+width: 8px;
+height: 8px;
+background-color: purple;
 `
 
 const TypeItem = ({ item, refetch }) => {
@@ -149,6 +205,7 @@ const TypeItem = ({ item, refetch }) => {
     {mode === 'DEFAULT' && 
     <>
     <TitleRow>
+      <PointsContainer>{item.points}</PointsContainer>
       <Name>{item.genericFeature.name}</Name>
       <StyledEditIcon onClick={() => setMode('EDIT')}/>
       <StyledTrashIcon onClick={() => setMode('DELETE')}/>
@@ -165,11 +222,13 @@ const TypeItem = ({ item, refetch }) => {
     <Name>
     Are you sure?
     </Name>
-    <button onClick={() => {
-      deleteWorkflowItem({ variables: { id: item.id } })
-      setMode('DEFAULT')
-    }}>Yes!</button>
-    <button onClick={() => setMode('DEFAULT')}>Not sure</button>
+    <ButtonRow>
+      <SureButton onClick={() => {
+        deleteWorkflowItem({ variables: { id: item.id } })
+        setMode('DEFAULT')
+      }}>Yes!</SureButton>
+      <NotSureButton onClick={() => setMode('DEFAULT')}>Not sure</NotSureButton>
+    </ButtonRow>
     </>
     }
     {mode === 'EDIT' && (
@@ -209,7 +268,7 @@ const TypeItem = ({ item, refetch }) => {
       {updatingWorkflow || updatingGenericFeature || updatingExamplePhoto ? <div>Updating...</div> : (
         <StyledForm>
         <NameRow>
-        <Name>Edit mode</Name>
+        <Name>Edit mode - this will edit the item for all cars.</Name>
         <Button type="submit" disabled={isSubmitting}>
           <StyledCheckIcon />
         </Button>

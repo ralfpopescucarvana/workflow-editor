@@ -2,6 +2,7 @@ import React from 'react'
 import { gql, useQuery } from '@apollo/client';
 import styled from 'styled-components'
 import ImperfectionItem from './ImperfectionItem'
+import NewImperfectionItem from './NewImperfectionItem'
 
 const IMPERFECTION_ITEMS = gql`
 {
@@ -13,6 +14,10 @@ const IMPERFECTION_ITEMS = gql`
       id
       name
       description
+      location {
+        id
+        name
+      }
     }
   }
 }
@@ -33,6 +38,7 @@ const ImperfectionItems = () => {
     <Container>
       {error && (<div>Error! {error}</div>)}
       {loading && (<div>Loading...</div>)}
+      <NewImperfectionItem refetch={refetch} />
       {data && data.imperfectionItems
       .map(imperfectionItem => <ImperfectionItem imperfectionItem={imperfectionItem} refetch={refetch} key={`imperfectionItem${imperfectionItem.id}`}/>)}
     </Container>

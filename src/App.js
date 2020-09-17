@@ -39,24 +39,43 @@ const localClient = new ApolloClient({
 
 const Container = styled.div`
 display: grid;
-grid-template-rows: 1fr;
+grid-template-rows: 80px 1fr;
 grid-template-columns: 300px 1fr;
-padding: 20px;
+`
+
+const Header = styled.div`
+display: flex;
+grid-row-start: 1;
+grid-column-start: 1;
+grid-column-end: 3;
+width: 100%;
+font-size: 40px;
+font-weight: 800;
+align-items: center;
+padding-left: 20px;
+color: white;
+background-color: rgb(0, 174, 217);
 `
 
 const Sidebar = styled.div`
 display: flex;
 flex-direction: column;
-grid-row-start: 1;
+grid-row-start: 2;
 grid-column-start: 1;
+padding: 32px;
 `
 
 const ContentArea = styled.div`
 display: flex;
 flex-direction: column;
-grid-row-start: 1;
+grid-row-start: 2;
 grid-column-start: 2;
 padding: 20px;
+`
+
+const SelectEnvironmentContainer = styled.div`
+font-size: 32px;
+margin-bottom: 16px;
 `
 
 function App() {
@@ -67,12 +86,16 @@ function App() {
     <ApolloProvider client={clientMap[inputValue.value]}>
       <Router>
         <Container>
+          <Header><div>workfloweditor</div></Header>
           <Sidebar>
-            Select Environment
-
-            <Select options={environmentOptions} value={inputValue} onChange={value => {
+            <SelectEnvironmentContainer>
+              Select Environment
+            </SelectEnvironmentContainer>
+            <div style={{ marginBottom: '32px'}}>
+            <Select options={environmentOptions}  value={inputValue} onChange={value => {
               setInputValue(value)
               }}/>
+              </div>
               <ModeSwap />
           </Sidebar>
           <ContentArea>

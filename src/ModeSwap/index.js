@@ -8,10 +8,13 @@ flex-direction: column;
 `
 
 const ModeButtonContainer = styled(Link)`
-background-color: ${({ isActive}) => isActive ? 'red' : 'black'};
-color: white;
+background-color: ${({ isActive}) => isActive ? 'rgb(0, 174, 217)' : '#f6f6f6'};
+color: ${({ isActive}) => isActive ? 'white' : 'inherit'};
+font-size: 32px;
+text-decoration: none;
 padding: 20px;
 border-radius: 8px;
+margin-bottom: 16px;
 `
 
 const ModeSwap = () => {
@@ -20,7 +23,7 @@ const ModeSwap = () => {
   return (
   <Container>
     <ModeButtonContainer to="/imperfectionreference" isActive={imperfectionReferenceActive}>
-      Imperfection Reference
+      Imperfections
     </ModeButtonContainer>
     <ModeButtonContainer to="/workflows" isActive={workflowsActive}>
       Workflows
