@@ -204,12 +204,6 @@ return (
       if (!values.name) {
         errors.name = 'Required';
       }
-      if (!values.description) {
-        errors.description = 'Required';
-      }
-      if (!values.internalDescription) {
-        errors.internalDescription = 'Required';
-      }
       if (values.sortOrdinal == null) {
         errors.sortOrdinal = 'Required';
       }
